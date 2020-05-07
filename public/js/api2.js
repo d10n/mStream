@@ -1,3 +1,15 @@
+var ROOT_PATH = (function() {
+  if (window.ROOT_PATH == null) {
+    // Guess root path
+    var selfPath = new URL(document.currentScript.src).pathname;
+    selfPath = selfPath.slice(0, -"/public/js/api2.js".length); // remove hardcoded path of this file to get root path
+    return selfPath;
+  } else {
+    // Use templated root path
+    return window.ROOT_PATH;
+  }
+})();
+
 var MSTREAMAPI = (function () {
   let mstreamModule = {};
 
@@ -10,6 +22,10 @@ var MSTREAMAPI = (function () {
   }
 
   $.ajaxPrefilter(function (options) {
+    // Prefix url with ROOT_PATH
+    if (/^\//.test(options.url)) {
+      options.url = ROOT_PATH + options.url;
+    }
     options.beforeSend = function (xhr) {
       xhr.setRequestHeader('x-access-token', MSTREAMAPI.currentServer.token);
     }
@@ -186,7 +202,7 @@ var MSTREAMAPI = (function () {
       defaultPathString = '/transcode/';
     }
 
-    var url = mstreamModule.currentServer.host + defaultPathString + filepath;
+    var url = mstreamModule.currentServer.host + ROOT_PATH + defaultPathString + filepath;
     if (mstreamModule.currentServer.token) {
       url = url + '?token=' + mstreamModule.currentServer.token;
     }
